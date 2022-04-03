@@ -27,9 +27,15 @@ async def UpdatePoints(ctx):
                 points = pd.read_csv(point)
             except:
                 print("Error retrieving point spreadsheet link")
+            list = {}
             for i in range(len(points)):
-                embed.add_field(name=f"{points.values[i][0]}", value=f"{points.values[i][1]}", inline="False")
-
+                list[points.values[i][0]] = points.values[i][1]
+            print(list)
+            sorts = sorted(list.items(), key=lambda x: x[1], reverse=True)
+            print("here")
+            print(sorts)
+            for i in sorts:
+                embed.add_field(name=f"{i[0]}", value=f"{i[1]}", inline="False")
             last_msg = await ctx.send(embed=embed)
             await asyncio.sleep(60)
             await last_msg.delete()
