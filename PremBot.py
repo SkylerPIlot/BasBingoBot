@@ -16,12 +16,14 @@ loop_list = []
 
 RunLoop = True
 
+check_func = lambda msg: not msg.pinned
+
 # -----------------------------Setup functions-----------------------------------
 
 
 async def UpdatePoints(ctx):
+        last_sort = []
         while RunLoop:
-
             embed = discord.Embed(title="Current Team points", colour=0x87CEEB)
             try:
                 points = pd.read_csv(point)
@@ -30,15 +32,18 @@ async def UpdatePoints(ctx):
             list = {}
             for i in range(len(points)):
                 list[points.values[i][0]] = points.values[i][1]
-            print(list)
+            #print(list)
             sorts = sorted(list.items(), key=lambda x: x[1], reverse=True)
-            print("here")
-            print(sorts)
-            for i in sorts:
-                embed.add_field(name=f"{i[0]}", value=f"{i[1]}", inline="False")
-            last_msg = await ctx.send(embed=embed)
+            #print("here")
+            #print(sorts)
+            #print(last_sort)
+            if sorts != last_sort:
+                await ctx.message.channel.purge(limit=20,check=check_func)
+                for i in sorts:
+                    embed.add_field(name=f"{i[0]}", value=f"{i[1]}", inline="False")
+                await ctx.send(embed=embed)
+            last_sort = sorts
             await asyncio.sleep(60)
-            await last_msg.delete()
 
 
 
@@ -75,7 +80,7 @@ async def on_ready():
 @commands.check(check_channel)
 async def start(ctx):
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Ba Services Bingo Event Spring 2022"))
-    await ctx.message.channel.purge(limit=20)
+    await ctx.message.channel.purge(limit=20,check=check_func)
     await pm_person("Started", ctx.author.id)
     loop = bot.loop.create_task(UpdatePoints(ctx))
     loop_list.append(loop)
@@ -84,7 +89,7 @@ async def start(ctx):
 @bot.command()
 @commands.check(check_channel)
 async def stop(ctx):
-    await ctx.message.channel.purge(limit=20)
+    await ctx.message.channel.purge(limit=20,check=check_func)
     await pm_person("Stopped", ctx.author.id)
     for i in loop_list:
         i.cancel()
