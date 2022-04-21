@@ -22,27 +22,36 @@ check_func = lambda msg: not msg.pinned
 
 
 async def UpdatePoints(ctx):
-        last_sort = []
+        last_sort1 = []
+        last_sort2 = []
         while RunLoop:
-            embed = discord.Embed(title="Current Team points", colour=0x87CEEB)
+            embed1 = discord.Embed(title="Current Team Points", colour=0x87CEEB)
+            embed2 = discord.Embed(title="Current Team Sweets", colour=0x6A0DAD)
             try:
                 points = pd.read_csv(point)
             except:
                 print("Error retrieving point spreadsheet link")
-            list = {}
+            list1 = {}
+            list2 = {}
             for i in range(len(points)):
-                list[points.values[i][0]] = points.values[i][1]
+                list1[points.values[i][0]] = points.values[i][1]
+                list2[points.values[i][0]] = points.values[i][2]
             #print(list)
-            sorts = sorted(list.items(), key=lambda x: x[1], reverse=True)
+            sorts1 = sorted(list1.items(), key=lambda x: x[1], reverse=True)
+            sorts2 = sorted(list2.items(), key=lambda x: x[1], reverse=True)
             #print("here")
             #print(sorts)
             #print(last_sort)
-            if sorts != last_sort:
+            if sorts1 != last_sort1 or sorts2 != last_sort2:
                 await ctx.message.channel.purge(limit=20,check=check_func)
-                for i in sorts:
-                    embed.add_field(name=f"{i[0]}", value=f"{i[1]}", inline="False")
-                await ctx.send(embed=embed)
-            last_sort = sorts
+                for i in sorts1:
+                    embed1.add_field(name=f"{i[0]}", value=f"{i[1]}", inline="False")
+                for i in sorts2:
+                    embed2.add_field(name=f"{i[0]}", value=f"{i[1]}", inline="False")
+                await ctx.send(embed=embed1)
+                await ctx.send(embed=embed2)
+            last_sort1 = sorts1
+            last_sort2 = sorts2
             await asyncio.sleep(60)
 
 
